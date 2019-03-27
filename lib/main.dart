@@ -13,8 +13,10 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Code Sample for material.AppBar.actions',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        accentColor: Colors.red,
       ),
-      home: MyStatelessWidget(),
+//      home: new MyStatelessWidget(),
+      home: new RandomWords(),
     );
   }
 }
@@ -30,17 +32,15 @@ class MyStatelessWidget extends StatelessWidget {
         title: Text('Hello World'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.shopping_cart),
+            icon: Icon(Icons.list),
             tooltip: 'Open shopping cart',
-            onPressed: () {
-              // ...
-            },
+            onPressed: () {},
           ),
         ],
       ),
       body: new Center(
-//        child: new Text("women"),
-        child: new RandomWords(),
+        child: new Text("women"),
+//        child: new RandomWords(),
       ),
     );
   }
@@ -74,7 +74,16 @@ class RandomListState extends State<RandomWords> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildWidget();
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Hello World"),
+        actions: <Widget>[
+          new IconButton(
+              icon: new Icon(Icons.list), onPressed: _pushSavedRouter)
+        ],
+      ),
+      body: _buildWidget(),
+    );
   }
 
   Widget _buildWidget() {
@@ -114,5 +123,26 @@ class RandomListState extends State<RandomWords> {
         });
       },
     );
+  }
+
+  ///路由
+  void _pushSavedRouter() {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      final titles = _saved.map((pair) {
+        return new ListTile(
+            title: new Text(
+          pair.asPascalCase,
+          style: _biggerFont,
+        ));
+      });
+      final divided =
+          ListTile.divideTiles(tiles: titles, context: context).toList();
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Save Data Router"),
+        ),
+        body: new ListView(children: divided),
+      );
+    }));
   }
 }
