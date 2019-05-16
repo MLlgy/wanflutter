@@ -1,148 +1,142 @@
-// This sample shows adding an action to an [AppBar] that opens a shopping cart.
-
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'navigation/fancy_bottom_navigation.dart';
+import 'second_page.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Code Sample for material.AppBar.actions',
+      title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        accentColor: Colors.red,
+        primarySwatch: Colors.deepOrange,
       ),
-//      home: new MyStatelessWidget(),
-      home: new RandomWords(),
+      home: MyHomePage(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  MyStatelessWidget({Key key}) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int currentPage = 0;
+
+  GlobalKey bottomNavigationKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      backgroundColor: Colors.redAccent,
       appBar: AppBar(
-        title: Text('Hello World'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.list),
-            tooltip: 'Open shopping cart',
-            onPressed: () {},
-          ),
-        ],
+        title: Text("Fancy Bottom Navigation"),
       ),
-      body: new Center(
-        child: new Text("women"),
-//        child: new RandomWords(),
-      ),
-    );
-  }
-}
-
-class RandomWords extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-//    return RandomWordsState();// 一个 Text
-    return RandomListState(); // ListView
-  }
-}
-
-///一个 Text
-class RandomWordsState extends State<RandomWords> {
-  @override
-  Widget build(BuildContext context) {
-    final wordPair = new WordPair.random();
-    return new Text(
-      wordPair.asPascalCase,
-      style: TextStyle(color: Colors.white),
-    );
-  }
-}
-
-/// ListView
-class RandomListState extends State<RandomWords> {
-  final _suggestion = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-  final _saved = new Set<WordPair>();
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Hello World"),
-        actions: <Widget>[
-          new IconButton(
-              icon: new Icon(Icons.list), onPressed: _pushSavedRouter)
-        ],
-      ),
-      body: _buildWidget(),
-    );
-  }
-
-  Widget _buildWidget() {
-    return new ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if (i.isOdd) {
-          return new Divider();
-        }
-        final index = i ~/ 2;
-        if (index >= _suggestion.length) {
-          _suggestion.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestion[index]);
-      },
-    );
-  }
-
-  Widget _buildRow(WordPair wordPair) {
-    final _alreadySaved = _saved.contains(wordPair);
-    return new ListTile(
-      title: new Text(
-        wordPair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: new Icon(
-        _alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: _alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (_alreadySaved) {
-            _saved.remove(wordPair);
-          } else {
-            _saved.add(wordPair);
-          }
-        });
-      },
-    );
-  }
-
-  ///路由
-  void _pushSavedRouter() {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-      final titles = _saved.map((pair) {
-        return new ListTile(
-            title: new Text(
-          pair.asPascalCase,
-          style: _biggerFont,
-        ));
-      });
-      final divided =
-          ListTile.divideTiles(tiles: titles, context: context).toList();
-      return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("Save Data Router"),
+      body: Container(
+        decoration: BoxDecoration(color: Colors.white),
+        child: Center(
+          child: _getPage(currentPage),
         ),
-        body: new ListView(children: divided),
-      );
-    }));
+      ),
+      bottomNavigationBar: FancyBottomNavigation(
+        tabs: [
+          TabData(
+              iconData: Icons.home,
+              title: "Home",
+              onclick: () {
+                final FancyBottomNavigationState fState =
+                    bottomNavigationKey.currentState;
+                fState.setPage(2);
+              }),
+          TabData(
+              iconData: Icons.search,
+              title: "Search",
+              onclick: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => SecondPage()))),
+          TabData(iconData: Icons.shopping_cart, title: "Basket")
+        ],
+        initialSelection: 1,
+        key: bottomNavigationKey,
+        onTabChangedListener: (position) {
+          setState(() {
+            currentPage = position;
+          });
+        },
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[Text("Hello"), Text("World")],
+        ),
+      ),
+    );
+  }
+
+  _getPage(int page) {
+    switch (page) {
+      case 0:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text("This is the home page"),
+            RaisedButton(
+              child: Text(
+                "Start new page",
+                style: TextStyle(color: Colors.white),
+              ),
+              color: Theme.of(context).primaryColor,
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => SecondPage()));
+              },
+            ),
+            RaisedButton(
+              child: Text(
+                "Change to page 3",
+                style: TextStyle(color: Colors.white),
+              ),
+              color: Theme.of(context).accentColor,
+              onPressed: () {
+                final FancyBottomNavigationState fState =
+                    bottomNavigationKey.currentState;
+                fState.setPage(2);
+              },
+            )
+          ],
+        );
+      case 1:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text("This is the search page"),
+            RaisedButton(
+              child: Text(
+                "Start new page",
+                style: TextStyle(color: Colors.white),
+              ),
+              color: Theme.of(context).primaryColor,
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => SecondPage()));
+              },
+            )
+          ],
+        );
+      default:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text("This is the basket page"),
+            RaisedButton(
+              child: Text(
+                "Start new page",
+                style: TextStyle(color: Colors.white),
+              ),
+              color: Theme.of(context).primaryColor,
+              onPressed: () {},
+            )
+          ],
+        );
+    }
   }
 }
